@@ -1,5 +1,5 @@
 IMAGE_NAME = "generic/ubuntu1804"
-N = 4 
+N = 2 
 
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
