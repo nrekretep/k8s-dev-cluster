@@ -183,6 +183,10 @@ Please paste the token from the file `dashboard.token` in the corresponding inpu
 
 ![](.assets/dashboard-startpage.png)
 
+### Cloud Foundry for Kubernetes
+
+* [Install cf for k8s on a local kubernetes cluster](./cf-for-k8s.md)
+
 ## Troubleshooting
 
 ### Calico pods do not get ready
