@@ -1,5 +1,7 @@
 IMAGE_NAME = "generic/ubuntu1804"
-N = 2 
+N = 4 
+
+# Please make sure you have created the necessary synced folders on your local storage 
 
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
@@ -35,6 +37,7 @@ Vagrant.configure("2") do |config|
             node.vm.box = IMAGE_NAME
             node.vm.network "private_network", ip: "192.169.50.#{i + 10}"
             node.vm.hostname = "node-#{i}"
+            node.vm.synced_folder "/home/vagrant-volumes/node-#{i}", "/mnt/k8s-volume", type: "9p"
             node.vm.provision "ansible" do |ansible|
                 ansible.playbook = "node-playbook.yml"
                 ansible.extra_vars = {

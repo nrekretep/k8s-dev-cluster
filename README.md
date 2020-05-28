@@ -81,6 +81,65 @@ N = 2
 ...
 ```
 
+### Adjust the synced folder settings
+
+To share files between your local machine and the vagrant boxes (master and worker nodes) 
+you need to create local folder for each of your boxes. 
+
+If you set the number of worker nodes to `N = 2` you have to create two local folders. 
+The folder needs to be named like name of the corresponding node it is mounted on. 
+
+In my setup I share these folders:
+
+```shell
+[peter@munin vagrant-volumes]$ tree
+.
+├── node-1
+├── node-2
+├── node-3
+└── node-4
+
+4 directories, 0 files
+```
+
+In the `Vagrantfile` you can change the local folder names and the remote folder names:
+
+```yaml
+...
+           node.vm.synced_folder "/home/vagrant-volumes/node-#{i}", "/mnt/k8s-volume", type: "9p"
+...
+```
+
+The synced folders are necessary to provide your kubernetes installation with a persistent volume per node on local storage. 
+
+Because I had some trouble to get the permission settings right on the synced folders I gave up on fiddling it out and just switch the user, group and  dynamic_ownership in `/etc/libvirt/qemu.conf`. 
+
+```shell
+...
+user = "root"
+group = "root"
+dynamic_ownership = 0
+...
+```
+
+In addition I had to disable the SELinux enforcement because of this error:
+
+```shell
+There was an error talking to Libvirt. The error message is shown
+below:
+
+Call to virDomainCreateWithFlags failed: Interner Fehler: qemu unexpectedly closed the monitor: 2020-05-28T16:57:10.911513Z qemu-system-x86_64: warning: host doesn't support requested feature: MSR(48FH).vmx-exit-load-perf-global-ctrl [bit 12]
+2020-05-28T16:57:10.911637Z qemu-system-x86_64: warning: host doesn't support requested feature: MSR(490H).vmx-entry-load-perf-global-ctrl [bit 13]
+2020-05-28T16:57:10.912857Z qemu-system-x86_64: warning: host doesn't support requested feature: MSR(48FH).vmx-exit-load-perf-global-ctrl [bit 12]
+2020-05-28T16:57:10.912875Z qemu-system-x86_64: warning: host doesn't support requested feature: MSR(490H).vmx-entry-load-perf-global-ctrl [bit 13]
+2020-05-28T16:57:10.932069Z qemu-system-x86_64: -device virtio-9p-pci,id=fs0,fsdev=fsdev-fs0,mount_tag=49682b31e655534e6f86d145d37f38c,bus=pci.0,addr=0x5: cannot initialize fsdev 'fsdev-fs0': failed to open '/home/vagrant-volumes/node-1': Permission denied
+
+```
+
+```shell
+$ sudo setenforce 0
+```
+
 ### Start the installation
 
 After that make sure your current directory is the directory of `Vagrantfile`. 
@@ -126,6 +185,31 @@ cp kubeconfig/master/home/vagrant/.kube/config ~/.kube/
 ```
 
 After the master the installation of the worker nodes will be started. When the installation has finished you can access the cluster. 
+
+### Using local storage
+
+In case you want to deploy some apps which need persistent storage than you should also deploy a persistent volume on local storage. 
+
+The file `local-storage.yml` contains a default storage class for local storage and it also defines two persistent volumes for the nodes `node-1` and `node-2`.
+
+Of course you can add more persistent volumes according to your needs. 
+
+You need to adjust the local directory in `local-storage.yml`:
+
+```yaml
+...
+  storageClassName: local-storage
+  local:
+    path: <INSERT THE PATH OF YOUR LOCAL STORAGE DIRECTORY HERE>
+  nodeAffinity:
+...
+```
+
+Just apply the `local-storage.yml` via 
+
+```shell
+kubectl apply -f local-storage.yml
+```
 
 ### Test the cluster
 
@@ -186,6 +270,14 @@ Please paste the token from the file `dashboard.token` in the corresponding inpu
 ### Cloud Foundry for Kubernetes
 
 * [Install cf for k8s on a local kubernetes cluster](./cf-for-k8s.md)
+
+### Delete the installation
+
+It is as easy as 
+
+```shell
+vagrant destroy
+```
 
 ## Troubleshooting
 
