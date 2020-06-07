@@ -2,7 +2,7 @@
 
 ## Why?
 
-If you followed my [tutorial on how to set up a local kubernetes cluster](README.md) then you may need a little bit of a workload for your cluster ;-). 
+If you followed my [tutorial on how to set up a local kubernetes cluster](./local-k8s-cluster.md) then you may need a little bit of a workload for your cluster ;-). 
 
 But that was not my use case. I created the aforementioned tutorial because I wanted to install [Cloud Foundry for kubernetes](https://github.com/cloudfoundry/cf-for-k8s)
  locally without having to pay the major public cloud providers just to test this and that.  
