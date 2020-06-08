@@ -198,6 +198,18 @@ app_registry:
 $ kapp delete -a cf
 ```
 
+### Troubleshooting
+
+#### Delete minio data from synced folder before reinstalling CF
+
+If you want to start over and reinstall the whole cluster or only Cloud Foundry you should make sure that you deleted the `.minio.sys` folder from the folder which was mounted on the minio node. 
+
+If you generate a new deployment file of CF there will also be the secrets newly generated. But when minio finds an existing `.minio.sys` folder from the previous installation the service will use stale data and you see the following error: 
+
+```shell
+minio ERROR Unable to initialize server switching into safe-mode: Unable to initialize config system: Invalid credentials
+```
+
 ### Misc
 
 #### Synced folders and persistent volumes
